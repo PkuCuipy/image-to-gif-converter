@@ -119,9 +119,9 @@
 
       .size-slider {
         width: 100%;
-        height: 6px;
+        height: 12px;
         background: #e2e8f0;
-        border-radius: 3px;
+        border-radius: 6px;
         outline: none;
         -webkit-appearance: none;
       }
@@ -129,11 +129,23 @@
       .size-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 20px;
-        height: 20px;
+        width: 32px;
+        height: 32px;
         background: #667eea;
         border-radius: 50%;
         cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      .size-slider::-moz-range-thumb {
+        width: 32px;
+        height: 32px;
+        background: #667eea;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       }
 
       .size-info {
@@ -142,6 +154,12 @@
         margin-top: 5px;
         font-size: 0.9rem;
         color: #718096;
+        justify-content: space-between;
+      }
+
+      .size-info span {
+        width: 8%;
+        text-align: center;
       }
 
       .preview-container {
@@ -247,9 +265,26 @@
 
         <div class="controls" id="controls">
           <div class="control-group">
+            <button class="download-btn" id="downloadBtn">
+              📥 Download GIF
+            </button>
+          </div>
+          <div class="control-group">
             <label for="sizeSlider">Output Size:</label>
-            <input type="range" id="sizeSlider" class="size-slider" min="10" max="200" value="100">
+            <input type="range" id="sizeSlider" class="size-slider" min="0" max="9" value="5" step="1">
             <div class="size-info">
+              <span>16px</span>
+              <span>24px</span>
+              <span>32px</span>
+              <span>48px</span>
+              <span>64px</span>
+              <span>128px</span>
+              <span>192px</span>
+              <span>256px</span>
+              <span>384px</span>
+              <span>512px</span>
+            </div>
+            <div class="size-info" style="margin-top: 10px;">
               <span>Original: <span id="originalSize">0×0</span></span>
               <span>Output: <span id="outputSize">0×0</span></span>
             </div>
@@ -265,11 +300,6 @@
           <canvas id="previewCanvas"></canvas>
         </div>
 
-        <div class="download-section" id="downloadSection">
-          <button class="download-btn" id="downloadBtn">
-            📥 Download GIF
-          </button>
-        </div>
       </div>
     </div>
 

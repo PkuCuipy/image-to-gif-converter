@@ -3,8 +3,9 @@ class ImageToGifConverter {
         this.originalImage = null;
         this.canvas = document.getElementById('previewCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.currentScale = 1;
-        
+        this.sizePresets = [16, 24, 32, 48, 64, 128, 192, 256, 384, 512];
+        this.currentSize = 128;
+
         this.initializeElements();
         this.setupEventListeners();
     }
@@ -18,7 +19,6 @@ class ImageToGifConverter {
         this.originalSize = document.getElementById('originalSize');
         this.outputSize = document.getElementById('outputSize');
         this.previewContainer = document.getElementById('previewContainer');
-        this.downloadSection = document.getElementById('downloadSection');
         this.downloadBtn = document.getElementById('downloadBtn');
         this.newImageBtn = document.getElementById('newImageBtn');
     }
@@ -118,52 +118,72 @@ class ImageToGifConverter {
 
     setupImagePreview() {
         const img = this.originalImage;
-        
+
         // Update size displays
         this.originalSize.textContent = `${img.naturalWidth}×${img.naturalHeight}`;
-        
-        // Set slider max to 200% of original
-        this.sizeSlider.max = 200;
-        this.sizeSlider.value = 100;
-        this.currentScale = 1;
-        
+
+        // Set slider to default (128px)
+        this.sizeSlider.value = 5;
+        this.currentSize = this.sizePresets[5]; // 128
+
         // Update canvas and preview
         this.updatePreview();
-        
+
         // Update output size display
         this.updateOutputSize();
     }
 
     updatePreview() {
         if (!this.originalImage) return;
-        
+
         const img = this.originalImage;
-        const newWidth = Math.round(img.naturalWidth * this.currentScale);
-        const newHeight = Math.round(img.naturalHeight * this.currentScale);
-        
+        const size = this.currentSize;
+
+        // Calculate dimensions maintaining aspect ratio
+        let newWidth, newHeight;
+        if (img.naturalWidth > img.naturalHeight) {
+            newWidth = size;
+            newHeight = Math.round((img.naturalHeight / img.naturalWidth) * size);
+        } else {
+            newHeight = size;
+            newWidth = Math.round((img.naturalWidth / img.naturalHeight) * size);
+        }
+
         // Set canvas size
         this.canvas.width = newWidth;
         this.canvas.height = newHeight;
-        
+
         // Set canvas CSS size for pixel-perfect rendering
         this.canvas.style.width = `${newWidth}px`;
         this.canvas.style.height = `${newHeight}px`;
-        
-        // Draw scaled image
-        this.ctx.imageSmoothingEnabled = false; // For crisp pixel scaling
+
+        // Draw scaled image with bilinear interpolation
+        this.ctx.imageSmoothingEnabled = true;
         this.ctx.drawImage(img, 0, 0, newWidth, newHeight);
     }
 
     updateOutputSize() {
         if (!this.originalImage) return;
-        
-        const newWidth = Math.round(this.originalImage.naturalWidth * this.currentScale);
-        const newHeight = Math.round(this.originalImage.naturalHeight * this.currentScale);
-        this.outputSize.textContent = `${newWidth}×${newHeight}`;
+
+        const img = this.originalImage;
+        const size = this.currentSize;
+
+        // Calculate dimensions maintaining aspect ratio
+        let newWidth, newHeight;
+        if (img.naturalWidth > img.naturalHeight) {
+            newWidth = size;
+            newHeight = Math.round((img.naturalHeight / img.naturalWidth) * size);
+        } else {
+            newHeight = size;
+            newWidth = Math.round((img.naturalWidth / img.naturalHeight) * size);
+        }
+
+        this.outputSize.textContent = `${newWidth}×${newHeight} (max: ${size}px)`;
     }
 
     handleSizeChange(e) {
-        this.currentScale = e.target.value / 100;
+        const index = parseInt(e.target.value);
+        this.currentSize = this.sizePresets[index];
         this.updatePreview();
         this.updateOutputSize();
     }
@@ -173,7 +193,6 @@ class ImageToGifConverter {
         this.dropZone.style.display = 'none';
         this.controls.style.display = 'block';
         this.previewContainer.style.display = 'block';
-        this.downloadSection.style.display = 'block';
     }
 
     async downloadGif() {
@@ -241,11 +260,11 @@ class ImageToGifConverter {
         // Hide controls and show drop zone
         this.controls.style.display = 'none';
         this.previewContainer.style.display = 'none';
-        this.downloadSection.style.display = 'none';
         this.dropZone.style.display = 'block';
         
         // Reset slider
-        this.sizeSlider.value = 100;
+        this.sizeSlider.value = 5;
+        this.currentSize = this.sizePresets[5]; // 128
         this.originalSize.textContent = '0×0';
         this.outputSize.textContent = '0×0';
     }
