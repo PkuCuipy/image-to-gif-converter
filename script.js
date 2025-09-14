@@ -168,6 +168,8 @@ class ImageToGifConverter {
                 tempCtx.imageSmoothingEnabled = true;
                 tempCtx.imageSmoothingQuality = 'high';
 
+                // Clear canvas to preserve transparency
+                tempCtx.clearRect(0, 0, newWidth, newHeight);
                 tempCtx.drawImage(currentImg, 0, 0, newWidth, newHeight);
                 currentImg = tempCanvas;
             }
@@ -182,6 +184,8 @@ class ImageToGifConverter {
             tempCtx.imageSmoothingEnabled = true;
             tempCtx.imageSmoothingQuality = 'high';
 
+            // Clear canvas to preserve transparency
+            tempCtx.clearRect(0, 0, targetWidth, targetHeight);
             tempCtx.drawImage(sourceImg, 0, 0, targetWidth, targetHeight);
             return tempCanvas;
         }
@@ -210,6 +214,9 @@ class ImageToGifConverter {
         // Set canvas CSS size for pixel-perfect rendering
         this.canvas.style.width = `${newWidth}px`;
         this.canvas.style.height = `${newHeight}px`;
+
+        // Clear canvas to ensure transparent background
+        this.ctx.clearRect(0, 0, newWidth, newHeight);
 
         // Use multi-pass scaling for better quality
         const scaledCanvas = this.multiPassScale(img, newWidth, newHeight);
@@ -261,7 +268,8 @@ class ImageToGifConverter {
                 quality: 10,
                 width: this.canvas.width,
                 height: this.canvas.height,
-                workerScript: 'gif-js/gif.worker.js'
+                workerScript: 'gif-js/gif.worker.js',
+                transparent: 'rgba(0,0,0,0)'
             });
 
             // Add the current canvas as a frame
