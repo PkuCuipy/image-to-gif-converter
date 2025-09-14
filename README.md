@@ -1,5 +1,7 @@
 ## Image to GIF Converter
 
+[中文](#图片转-gif-工具) | [English](#image-to-gif-converter)
+
 A clean and efficient online image-to-GIF converter with drag-and-drop, paste support, and real-time preview with size adjustment.
 
 ### Features
@@ -29,6 +31,8 @@ image-to-gif-converter/
 │   └── gif.worker.js
 └── README.md
 ```
+
+---
 
 ## 图片转 GIF 工具
 
