@@ -102,7 +102,7 @@
       }
 
       .controls {
-        margin-top: 30px;
+        /* margin-top: 30px; */
         display: none;
       }
 
@@ -168,7 +168,6 @@
         background: #f7fafc;
         border-radius: 10px;
         padding: 20px;
-        max-height: 500px;
         overflow-y: auto;
       }
 
@@ -243,8 +242,7 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>🎨 Image to GIF Converter</h1>
-        <p>Convert your images to GIF format with custom sizing</p>
+        <h1>Image to GIF Converter</h1>
       </div>
 
       <div class="main-content">
@@ -257,7 +255,7 @@
           </button>
           <input type="file" id="fileInput" class="file-input" accept="image/*">
           <div class="paste-hint">
-            💡 You can also paste images directly with Ctrl+V
+            💡 You can also paste images directly with Ctrl+V (or Cmd+V on Mac)
           </div>
         </div>
 
@@ -265,32 +263,16 @@
 
         <div class="controls" id="controls">
           <div class="control-group">
-            <button class="download-btn" id="downloadBtn">
+            <div id="outputSizeDisplay" style="margin-bottom: 10px; font-weight: 500; color: #2d3748;">
+              Output Size: 128×128 (original: 1024×768)
+            </div>
+            <input type="range" id="sizeSlider" class="size-slider" min="16" max="512" value="128" step="1">
+          </div>
+          <div class="control-group" style="display: flex; gap: 10px;">
+            <button class="download-btn" id="downloadBtn" style="flex: 1;">
               📥 Download GIF
             </button>
-          </div>
-          <div class="control-group">
-            <label for="sizeSlider">Output Size:</label>
-            <input type="range" id="sizeSlider" class="size-slider" min="0" max="9" value="5" step="1">
-            <div class="size-info">
-              <span>16px</span>
-              <span>24px</span>
-              <span>32px</span>
-              <span>48px</span>
-              <span>64px</span>
-              <span>128px</span>
-              <span>192px</span>
-              <span>256px</span>
-              <span>384px</span>
-              <span>512px</span>
-            </div>
-            <div class="size-info" style="margin-top: 10px;">
-              <span>Original: <span id="originalSize">0×0</span></span>
-              <span>Output: <span id="outputSize">0×0</span></span>
-            </div>
-          </div>
-          <div class="control-group">
-            <button class="browse-btn" id="newImageBtn" style="font-size: 0.9rem; padding: 8px 20px;">
+            <button class="browse-btn" id="newImageBtn" style="flex: 1; font-size: 0.9rem; padding: 8px 20px;">
               🔄 Upload New Image
             </button>
           </div>

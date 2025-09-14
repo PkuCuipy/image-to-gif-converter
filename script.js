@@ -3,7 +3,6 @@ class ImageToGifConverter {
         this.originalImage = null;
         this.canvas = document.getElementById('previewCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.sizePresets = [16, 24, 32, 48, 64, 128, 192, 256, 384, 512];
         this.currentSize = 128;
 
         this.initializeElements();
@@ -16,8 +15,7 @@ class ImageToGifConverter {
         this.originalImageEl = document.getElementById('originalImage');
         this.controls = document.getElementById('controls');
         this.sizeSlider = document.getElementById('sizeSlider');
-        this.originalSize = document.getElementById('originalSize');
-        this.outputSize = document.getElementById('outputSize');
+        this.outputSizeDisplay = document.getElementById('outputSizeDisplay');
         this.previewContainer = document.getElementById('previewContainer');
         this.downloadBtn = document.getElementById('downloadBtn');
         this.newImageBtn = document.getElementById('newImageBtn');
@@ -119,18 +117,74 @@ class ImageToGifConverter {
     setupImagePreview() {
         const img = this.originalImage;
 
-        // Update size displays
-        this.originalSize.textContent = `${img.naturalWidth}×${img.naturalHeight}`;
-
         // Set slider to default (128px)
-        this.sizeSlider.value = 5;
-        this.currentSize = this.sizePresets[5]; // 128
+        this.sizeSlider.value = 128;
+        this.currentSize = 128;
 
         // Update canvas and preview
         this.updatePreview();
 
         // Update output size display
         this.updateOutputSize();
+    }
+
+    // Multi-pass bilinear scaling for optimal quality
+    multiPassScale(sourceImg, targetWidth, targetHeight) {
+        const sourceWidth = sourceImg.naturalWidth || sourceImg.width;
+        const sourceHeight = sourceImg.naturalHeight || sourceImg.height;
+
+        // Calculate scale factor
+        const scaleX = targetWidth / sourceWidth;
+        const scaleY = targetHeight / sourceHeight;
+        const scale = Math.min(scaleX, scaleY);
+
+        // If scaling down less than 0.5x, use multi-pass
+        if (scale < 0.5) {
+            const passes = [];
+            let currentScale = scale;
+
+            // Break down into 2x steps and remainder
+            while (currentScale < 0.5) {
+                passes.push(0.5);
+                currentScale /= 0.5;
+            }
+            if (currentScale < 1.0) {
+                passes.push(currentScale);
+            }
+
+            // Apply passes
+            let currentImg = sourceImg;
+            let tempCanvas, tempCtx;
+
+            for (let i = 0; i < passes.length; i++) {
+                const passScale = passes[i];
+                const newWidth = Math.round(currentImg.width * passScale);
+                const newHeight = Math.round(currentImg.height * passScale);
+
+                tempCanvas = document.createElement('canvas');
+                tempCanvas.width = newWidth;
+                tempCanvas.height = newHeight;
+                tempCtx = tempCanvas.getContext('2d');
+                tempCtx.imageSmoothingEnabled = true;
+                tempCtx.imageSmoothingQuality = 'high';
+
+                tempCtx.drawImage(currentImg, 0, 0, newWidth, newHeight);
+                currentImg = tempCanvas;
+            }
+
+            return tempCanvas;
+        } else {
+            // Single pass for upscaling or small downscaling
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = targetWidth;
+            tempCanvas.height = targetHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = true;
+            tempCtx.imageSmoothingQuality = 'high';
+
+            tempCtx.drawImage(sourceImg, 0, 0, targetWidth, targetHeight);
+            return tempCanvas;
+        }
     }
 
     updatePreview() {
@@ -157,9 +211,9 @@ class ImageToGifConverter {
         this.canvas.style.width = `${newWidth}px`;
         this.canvas.style.height = `${newHeight}px`;
 
-        // Draw scaled image with bilinear interpolation
-        this.ctx.imageSmoothingEnabled = true;
-        this.ctx.drawImage(img, 0, 0, newWidth, newHeight);
+        // Use multi-pass scaling for better quality
+        const scaledCanvas = this.multiPassScale(img, newWidth, newHeight);
+        this.ctx.drawImage(scaledCanvas, 0, 0);
     }
 
     updateOutputSize() {
@@ -178,12 +232,11 @@ class ImageToGifConverter {
             newWidth = Math.round((img.naturalWidth / img.naturalHeight) * size);
         }
 
-        this.outputSize.textContent = `${newWidth}×${newHeight} (max: ${size}px)`;
+        this.outputSizeDisplay.textContent = `Output Size: ${newWidth}×${newHeight} (original: ${img.naturalWidth}×${img.naturalHeight})`;
     }
 
     handleSizeChange(e) {
-        const index = parseInt(e.target.value);
-        this.currentSize = this.sizePresets[index];
+        this.currentSize = parseInt(e.target.value);
         this.updatePreview();
         this.updateOutputSize();
     }
@@ -263,10 +316,9 @@ class ImageToGifConverter {
         this.dropZone.style.display = 'block';
         
         // Reset slider
-        this.sizeSlider.value = 5;
-        this.currentSize = this.sizePresets[5]; // 128
-        this.originalSize.textContent = '0×0';
-        this.outputSize.textContent = '0×0';
+        this.sizeSlider.value = 128;
+        this.currentSize = 128;
+        this.outputSizeDisplay.textContent = 'Output Size: 128×128 (original: 1024×768)';
     }
 }
 
