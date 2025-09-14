@@ -188,7 +188,8 @@ class ImageToGifConverter {
                 workers: 2,
                 quality: 10,
                 width: this.canvas.width,
-                height: this.canvas.height
+                height: this.canvas.height,
+                workerScript: 'gif-js/gif.worker.js'
             });
 
             // Add the current canvas as a frame
